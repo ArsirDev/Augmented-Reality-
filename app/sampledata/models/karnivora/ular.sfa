@@ -1,0 +1,94 @@
+{
+  materials: [
+    {
+      name: '83',
+      parameters: [
+        {
+          baseColorFactor: null,
+        },
+        {
+          baseColor: null,
+        },
+        {
+          diffuseColorFactor: [
+            1,
+            1,
+            1,
+            1,
+          ],
+        },
+        {
+          diffuseColor: '9795fede8d40e122602be56aca6bfc3932ae8baf',
+        },
+        {
+          normal: null,
+        },
+        {
+          metallicFactor: null,
+        },
+        {
+          roughnessFactor: null,
+        },
+        {
+          specularFactor: [
+            1,
+            1,
+            1,
+          ],
+        },
+        {
+          glossinessFactor: 1,
+        },
+        {
+          specularGlossiness: 'aa6ca9a70afea36f2da36330aa413dc1fc55137b',
+        },
+        {
+          specularGlossinessCalculation: null,
+        },
+        {
+          metallicRoughness: null,
+        },
+        {
+          occlusion: null,
+        },
+        {
+          emissiveFactor: [
+            0,
+            0,
+            0,
+            1,
+          ],
+        },
+        {
+          emissive: null,
+        },
+        {
+          opacity: null,
+        },
+      ],
+      source: 'build/sceneform_sdk/default_materials/gltf_material.sfm',
+    },
+  ],
+  model: {
+    attributes: [
+      'Position',
+      'TexCoord',
+      'Orientation',
+    ],
+    collision: {},
+    file: 'sampledata/models/karnivora/ular.glb',
+    name: 'ular',
+    recenter: 'root',
+  },
+  samplers: [
+    {
+      name: '9795fede8d40e122602be56aca6bfc3932ae8baf',
+      pipeline_name: '*2',
+    },
+    {
+      name: 'aa6ca9a70afea36f2da36330aa413dc1fc55137b',
+      pipeline_name: '*3',
+    },
+  ],
+  version: '0.54:2',
+}

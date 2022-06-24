@@ -1,0 +1,94 @@
+{
+  materials: [
+    {
+      name: '49',
+      parameters: [
+        {
+          baseColorFactor: null,
+        },
+        {
+          baseColor: null,
+        },
+        {
+          diffuseColorFactor: [
+            1,
+            1,
+            1,
+            1,
+          ],
+        },
+        {
+          diffuseColor: '884a119b84ddadfafd26b44e3621d88c96c36ab5',
+        },
+        {
+          normal: null,
+        },
+        {
+          metallicFactor: null,
+        },
+        {
+          roughnessFactor: null,
+        },
+        {
+          specularFactor: [
+            1,
+            1,
+            1,
+          ],
+        },
+        {
+          glossinessFactor: 1,
+        },
+        {
+          specularGlossiness: 'a8c71ea251aefb27ce123a76f3a7cb1115c72f82',
+        },
+        {
+          specularGlossinessCalculation: null,
+        },
+        {
+          metallicRoughness: null,
+        },
+        {
+          occlusion: null,
+        },
+        {
+          emissiveFactor: [
+            0,
+            0,
+            0,
+            1,
+          ],
+        },
+        {
+          emissive: null,
+        },
+        {
+          opacity: null,
+        },
+      ],
+      source: 'build/sceneform_sdk/default_materials/gltf_material.sfm',
+    },
+  ],
+  model: {
+    attributes: [
+      'Position',
+      'TexCoord',
+      'Orientation',
+    ],
+    collision: {},
+    file: 'sampledata/models/karnivora/serigala.glb',
+    name: 'serigala',
+    recenter: 'root',
+  },
+  samplers: [
+    {
+      name: '884a119b84ddadfafd26b44e3621d88c96c36ab5',
+      pipeline_name: '*2',
+    },
+    {
+      name: 'a8c71ea251aefb27ce123a76f3a7cb1115c72f82',
+      pipeline_name: '*3',
+    },
+  ],
+  version: '0.54:2',
+}

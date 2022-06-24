@@ -1,0 +1,94 @@
+{
+  materials: [
+    {
+      name: '75',
+      parameters: [
+        {
+          baseColorFactor: null,
+        },
+        {
+          baseColor: null,
+        },
+        {
+          diffuseColorFactor: [
+            1,
+            1,
+            1,
+            1,
+          ],
+        },
+        {
+          diffuseColor: '475254781a54a310a751bbfa9ed562ea7707aa89',
+        },
+        {
+          normal: null,
+        },
+        {
+          metallicFactor: null,
+        },
+        {
+          roughnessFactor: null,
+        },
+        {
+          specularFactor: [
+            1,
+            1,
+            1,
+          ],
+        },
+        {
+          glossinessFactor: 1,
+        },
+        {
+          specularGlossiness: '7b8f708fb6f45dfc32f098fa3d5a5a58350a279b',
+        },
+        {
+          specularGlossinessCalculation: null,
+        },
+        {
+          metallicRoughness: null,
+        },
+        {
+          occlusion: null,
+        },
+        {
+          emissiveFactor: [
+            0,
+            0,
+            0,
+            1,
+          ],
+        },
+        {
+          emissive: null,
+        },
+        {
+          opacity: null,
+        },
+      ],
+      source: 'build/sceneform_sdk/default_materials/gltf_material.sfm',
+    },
+  ],
+  model: {
+    attributes: [
+      'Position',
+      'TexCoord',
+      'Orientation',
+    ],
+    collision: {},
+    file: 'sampledata/models/karnivora/singa.glb',
+    name: 'singa',
+    recenter: 'root',
+  },
+  samplers: [
+    {
+      name: '475254781a54a310a751bbfa9ed562ea7707aa89',
+      pipeline_name: '*2',
+    },
+    {
+      name: '7b8f708fb6f45dfc32f098fa3d5a5a58350a279b',
+      pipeline_name: '*3',
+    },
+  ],
+  version: '0.54:2',
+}

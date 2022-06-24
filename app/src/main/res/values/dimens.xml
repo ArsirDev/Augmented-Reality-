@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="pageMargin">30dp</dimen>
+    <dimen name="offset">30dp</dimen>
+    <dimen name="pageMarginAndOffset">50dp</dimen>
+
+    <dimen name="next_item_visible_width">50dp</dimen>
+    <dimen name="viewpager_horizontal_margin">50dp</dimen>
+
+    <dimen name="default_spacing_small">4dp</dimen>
+    <dimen name="default_spacing_medium">8dp</dimen>
+    <dimen name="default_spacing_large">16dp</dimen>
+    <dimen name="default_spacing_huge">128dp</dimen>
+    <dimen name="toolbar_elevation">4dp</dimen>
+    <dimen name="header_height">180dp</dimen>
+</resources>

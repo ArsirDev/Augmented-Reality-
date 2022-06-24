@@ -1,0 +1,94 @@
+{
+  materials: [
+    {
+      name: '128',
+      parameters: [
+        {
+          baseColorFactor: null,
+        },
+        {
+          baseColor: null,
+        },
+        {
+          diffuseColorFactor: [
+            1,
+            1,
+            1,
+            1,
+          ],
+        },
+        {
+          diffuseColor: '16ffcc46e13d5b321ed0aaba08d681958d562751',
+        },
+        {
+          normal: null,
+        },
+        {
+          metallicFactor: null,
+        },
+        {
+          roughnessFactor: null,
+        },
+        {
+          specularFactor: [
+            1,
+            1,
+            1,
+          ],
+        },
+        {
+          glossinessFactor: 1,
+        },
+        {
+          specularGlossiness: '94430f0ea5e123aaa95cb2f1f1f23d61437ac98c',
+        },
+        {
+          specularGlossinessCalculation: null,
+        },
+        {
+          metallicRoughness: null,
+        },
+        {
+          occlusion: null,
+        },
+        {
+          emissiveFactor: [
+            0,
+            0,
+            0,
+            1,
+          ],
+        },
+        {
+          emissive: null,
+        },
+        {
+          opacity: null,
+        },
+      ],
+      source: 'build/sceneform_sdk/default_materials/gltf_material.sfm',
+    },
+  ],
+  model: {
+    attributes: [
+      'Position',
+      'TexCoord',
+      'Orientation',
+    ],
+    collision: {},
+    file: 'sampledata/models/insektivora/kalelawar.glb',
+    name: 'kalelawar',
+    recenter: 'root',
+  },
+  samplers: [
+    {
+      name: '16ffcc46e13d5b321ed0aaba08d681958d562751',
+      pipeline_name: '*2',
+    },
+    {
+      name: '94430f0ea5e123aaa95cb2f1f1f23d61437ac98c',
+      pipeline_name: '*3',
+    },
+  ],
+  version: '0.54:2',
+}

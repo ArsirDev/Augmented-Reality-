@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">AnimalAugmentedReality</string>
+    <string name="welcome_description_one">Aplikasi ini sebagai media pengenalan hewan berdasarkan jenis nya.</string>
+    <string name="welcome_description_two">Ada beragam informasi berdasarkan jenis hewan yang dapat depelajari</string>
+    <string name="welcome_description_three">Selamat menggunakan aplikasi</string>
+    <string name="detail_title_text">Detail Hewan</string>
+    <string name="detail_description_text">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</string>
+</resources>

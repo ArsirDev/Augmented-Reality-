@@ -1,0 +1,94 @@
+{
+  materials: [
+    {
+      name: '66',
+      parameters: [
+        {
+          baseColorFactor: null,
+        },
+        {
+          baseColor: null,
+        },
+        {
+          diffuseColorFactor: [
+            1,
+            1,
+            1,
+            1,
+          ],
+        },
+        {
+          diffuseColor: '17d580e04a4128b45a9b0bed08891926fab81630',
+        },
+        {
+          normal: null,
+        },
+        {
+          metallicFactor: null,
+        },
+        {
+          roughnessFactor: null,
+        },
+        {
+          specularFactor: [
+            1,
+            1,
+            1,
+          ],
+        },
+        {
+          glossinessFactor: 1,
+        },
+        {
+          specularGlossiness: '8d6f494ea686261f04ba81c5da5d7a131bbe788f',
+        },
+        {
+          specularGlossinessCalculation: null,
+        },
+        {
+          metallicRoughness: null,
+        },
+        {
+          occlusion: null,
+        },
+        {
+          emissiveFactor: [
+            0,
+            0,
+            0,
+            1,
+          ],
+        },
+        {
+          emissive: null,
+        },
+        {
+          opacity: null,
+        },
+      ],
+      source: 'build/sceneform_sdk/default_materials/gltf_material.sfm',
+    },
+  ],
+  model: {
+    attributes: [
+      'Position',
+      'TexCoord',
+      'Orientation',
+    ],
+    collision: {},
+    file: 'sampledata/models/herbivora/kambing.glb',
+    name: 'kambing',
+    recenter: 'root',
+  },
+  samplers: [
+    {
+      name: '17d580e04a4128b45a9b0bed08891926fab81630',
+      pipeline_name: '*2',
+    },
+    {
+      name: '8d6f494ea686261f04ba81c5da5d7a131bbe788f',
+      pipeline_name: '*3',
+    },
+  ],
+  version: '0.54:2',
+}

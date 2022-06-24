@@ -1,0 +1,94 @@
+{
+  materials: [
+    {
+      name: '63',
+      parameters: [
+        {
+          baseColorFactor: null,
+        },
+        {
+          baseColor: null,
+        },
+        {
+          diffuseColorFactor: [
+            1,
+            1,
+            1,
+            1,
+          ],
+        },
+        {
+          diffuseColor: 'f349952f1a086a41e32fd98610c0a64d272bf8ff',
+        },
+        {
+          normal: null,
+        },
+        {
+          metallicFactor: null,
+        },
+        {
+          roughnessFactor: null,
+        },
+        {
+          specularFactor: [
+            1,
+            1,
+            1,
+          ],
+        },
+        {
+          glossinessFactor: 1,
+        },
+        {
+          specularGlossiness: '0e1ed1905522da29fd66c3a2615ddf9e5b831bc9',
+        },
+        {
+          specularGlossinessCalculation: null,
+        },
+        {
+          metallicRoughness: null,
+        },
+        {
+          occlusion: null,
+        },
+        {
+          emissiveFactor: [
+            0,
+            0,
+            0,
+            1,
+          ],
+        },
+        {
+          emissive: null,
+        },
+        {
+          opacity: null,
+        },
+      ],
+      source: 'build/sceneform_sdk/default_materials/gltf_material.sfm',
+    },
+  ],
+  model: {
+    attributes: [
+      'Position',
+      'TexCoord',
+      'Orientation',
+    ],
+    collision: {},
+    file: 'sampledata/models/karnivora/komodo.glb',
+    name: 'komodo',
+    recenter: 'root',
+  },
+  samplers: [
+    {
+      name: 'f349952f1a086a41e32fd98610c0a64d272bf8ff',
+      pipeline_name: '*2',
+    },
+    {
+      name: '0e1ed1905522da29fd66c3a2615ddf9e5b831bc9',
+      pipeline_name: '*3',
+    },
+  ],
+  version: '0.54:2',
+}
