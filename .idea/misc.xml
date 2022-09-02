@@ -9,19 +9,19 @@
         <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/drawable/rounded_bottom_button.xml" value="0.20833333333333334" />
         <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/drawable/rounded_bottom_view.xml" value="0.20833333333333334" />
         <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/drawable/wave_splashscreen.xml" value="0.1712962962962963" />
-        <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_about.xml" value="0.11548913043478261" />
+        <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_about.xml" value="0.264" />
         <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_augmented_reality_image.xml" value="0.20108695652173914" />
-        <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_detail.xml" value="0.4" />
+        <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_detail.xml" value="0.2" />
         <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_herbivora.xml" value="0.1738143289606458" />
-        <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_home.xml" value="0.11548913043478261" />
+        <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_home.xml" value="0.4" />
         <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_insektivora.xml" value="0.1738143289606458" />
         <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_jenis.xml" value="0.11548913043478261" />
         <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_karnivora.xml" value="0.11548913043478261" />
         <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_karnivora_image.xml" value="0.6" />
         <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_omnivora.xml" value="0.1738143289606458" />
-        <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_panduan.xml" value="0.11548913043478261" />
-        <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_splash_screen.xml" value="0.16" />
-        <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_welcome.xml" value="0.2" />
+        <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_panduan.xml" value="0.4" />
+        <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_splash_screen.xml" value="0.264" />
+        <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/activity_welcome.xml" value="0.264" />
         <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/image_jenis_item.xml" value="0.17406659939455096" />
         <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/item_image_viewpager.xml" value="0.4194078947368421" />
         <entry key="..\:/Users/MSI Gaming/AndroidStudioProjects/AnimalAugmentedReality/app/src/main/res/layout/item_list_animal_layout.xml" value="0.11548913043478261" />

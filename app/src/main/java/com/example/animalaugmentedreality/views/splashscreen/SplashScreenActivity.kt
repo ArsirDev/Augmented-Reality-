@@ -7,9 +7,8 @@ import android.os.Bundle
 import android.view.animation.Animation
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.animalaugmentedreality.R
 import com.example.animalaugmentedreality.databinding.ActivitySplashScreenBinding
-import com.example.animalaugmentedreality.utils.ScaleAnimationCustome
+import com.example.animalaugmentedreality.utils.scaleAnimationCustom
 import com.example.animalaugmentedreality.utils.SessionManager
 import com.example.animalaugmentedreality.views.home.HomeActivity
 import com.example.animalaugmentedreality.views.welcome.WelcomeActivity
@@ -35,7 +34,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private fun scale() {
 
-        val scale_show = ScaleAnimationCustome(
+        val scale_show = scaleAnimationCustom(
             0f,
             1f,
             0f,

@@ -5,4 +5,9 @@
     <string name="welcome_description_three">Selamat menggunakan aplikasi</string>
     <string name="detail_title_text">Detail Hewan</string>
     <string name="detail_description_text">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</string>
+    <string name="exit_message">Yakin ingin keluar dari aplikasi!!!</string>
+    <string name="panduan_jenis_text"><b>Jenis Hewan</b>: Akan menampilakan berbagai jenis hewan dimana akan menampilkan object Hewan juga deskripsi dari hewan nya berdasarkan jenis hewan yang dipilih.</string>
+    <string name="panduan_text"><b>Panduan</b>: Menampilkan Panduan untuk penggunaan aplikasi</string>
+    <string name="panduan_tentang_text"><b>Tentang</b>: Menampilkan tentang pembuat</string>
+    <string name="panduan_keluar_text"><b>Keluar</b>: Menampilkan alert dialog untuk keluar dari aplikasi</string>
 </resources>

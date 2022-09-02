@@ -1,10 +1,11 @@
 package com.example.animalaugmentedreality.views.home
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.ViewPager
 import com.example.animalaugmentedreality.R
 import com.example.animalaugmentedreality.databinding.ActivityHomeBinding
@@ -32,10 +33,10 @@ class HomeActivity : AppCompatActivity() {
         _binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
         initialView()
-        intialAction()
+        initialAction()
     }
 
-    private fun intialAction() {
+    private fun initialAction() {
         with(binding) {
             btnJenis.setOnClickListener {
                 startActivity(Intent(this@HomeActivity, JenisActivity::class.java))
@@ -49,7 +50,22 @@ class HomeActivity : AppCompatActivity() {
                 startActivity(Intent(this@HomeActivity, AboutActivity::class.java))
                 finishAffinity()
             }
+            btnKeluar.setOnClickListener {
+                showDialog();
+            }
         }
+    }
+
+    private fun showDialog() {
+        AlertDialog.Builder(this)
+            .setPositiveButton("Keluar") { _, _ ->
+                finish()
+            }
+            .setNegativeButton("Batal") { i, _ ->
+                i.dismiss()
+            }
+            .setMessage(getString(R.string.exit_message))
+            .show()
     }
 
     private fun initialView() {

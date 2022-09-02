@@ -11,7 +11,10 @@ import com.example.animalaugmentedreality.R
 import com.example.animalaugmentedreality.databinding.ActivityOmnivoraBinding
 import com.example.animalaugmentedreality.utils.Content.AYAM
 import com.example.animalaugmentedreality.utils.Content.BEBEK
+import com.example.animalaugmentedreality.utils.Content.CATEGORY
 import com.example.animalaugmentedreality.utils.Content.KUCING
+import com.example.animalaugmentedreality.utils.Content.NAME
+import com.example.animalaugmentedreality.utils.Content.OMNIVORA
 import com.example.animalaugmentedreality.utils.Content.PAUS
 import com.example.animalaugmentedreality.utils.SnackbarHelper
 import com.example.animalaugmentedreality.views.detail.DetailActivity
@@ -256,9 +259,12 @@ class OmnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
 
         }
         arView.scene.addChild(anchorNode)
-        arView.scene.setOnTouchListener { hitTestResult, motionEvent ->
-            Toast.makeText(this, "Model tidak dapat dimuat", Toast.LENGTH_SHORT).show()
-            startActivity(Intent(this, DetailActivity::class.java).putExtra("nama", title))
+        arView.scene.setOnTouchListener { _, _ ->
+            val bundle = Bundle().apply {
+                putString(CATEGORY, OMNIVORA)
+                putString(NAME, title)
+            }
+            startActivity(Intent(this, DetailActivity::class.java).putExtras(bundle))
             finish()
             true
         }

@@ -2,14 +2,12 @@ package com.example.animalaugmentedreality.views.detail
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import com.example.animalaugmentedreality.databinding.ActivityDetailBinding
-import com.example.animalaugmentedreality.utils.Content.CATEGORY
 import com.example.animalaugmentedreality.utils.AnimalDataState
+import com.example.animalaugmentedreality.utils.Content.CATEGORY
 import com.example.animalaugmentedreality.utils.Content.NAME
-import com.example.animalaugmentedreality.utils.P_E_M
-import com.example.animalaugmentedreality.utils.simpleName
 import com.example.animalaugmentedreality.views.jenis.JenisActivity
 
 class DetailActivity : AppCompatActivity() {
@@ -48,7 +46,7 @@ class DetailActivity : AppCompatActivity() {
             when (detailItem.title) {
                 name -> {
                     with(binding) {
-                        tvNama.text = detailItem.title
+                        tvJudul.text = detailItem.title
                         tvDescription.text = detailItem.description
                         tvHabitat.text = detailItem.habitat
                         tvMakanan.text = detailItem.feed

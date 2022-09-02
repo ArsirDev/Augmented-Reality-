@@ -9,7 +9,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.example.animalaugmentedreality.R
 import com.example.animalaugmentedreality.databinding.ActivityKarnivoraBinding
+import com.example.animalaugmentedreality.utils.ARCoreSessionLifecycleHelper
+import com.example.animalaugmentedreality.utils.Content.CATEGORY
+import com.example.animalaugmentedreality.utils.Content.KARNIVORA
 import com.example.animalaugmentedreality.utils.Content.KOMODO
+import com.example.animalaugmentedreality.utils.Content.NAME
 import com.example.animalaugmentedreality.utils.Content.SERIGALA
 import com.example.animalaugmentedreality.utils.Content.SINGA
 import com.example.animalaugmentedreality.utils.Content.ULAR
@@ -49,6 +53,8 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
     private var shouldConfigureSession = false
 
     private var session: Session? = null
+
+    lateinit var arCoreSessionHelper: ARCoreSessionLifecycleHelper
 
     private var shouldAddModel = true
 
@@ -109,11 +115,27 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
     }
 
     private fun configureSession() {
+
         val config = Config(session)
         if (!buildDatabase(config)) {
             Toast.makeText(this, "Error built-in database", Toast.LENGTH_SHORT).show()
         }
-        config.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+        config.apply {
+            lightEstimationMode =  Config.LightEstimationMode.ENVIRONMENTAL_HDR
+            focusMode = Config.FocusMode.AUTO
+            updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+
+            depthMode =
+                if (session!!.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
+                    Config.DepthMode.AUTOMATIC
+                } else {
+                    Config.DepthMode.DISABLED
+                }
+        }
+//        config.lightEstimationMode =  Config.LightEstimationMode.ENVIRONMENTAL_HDR
+//        config.focusMode = Config.FocusMode.AUTO
+//        config.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+
         session!!.configure(config)
     }
 
@@ -134,6 +156,8 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
         super.onCreate(savedInstanceState)
         _binding = ActivityKarnivoraBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        arCoreSessionHelper = ARCoreSessionLifecycleHelper(this)
 
         requestPermissionLauncher.launch(CAMERA)
 
@@ -183,9 +207,9 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
             for (augmentedImage in updateAugmentedImage) {
                 when (augmentedImage.trackingState) {
                     TrackingState.PAUSED -> {
-                        val text = String.format("Detected Image %d", augmentedImage.index)
-                        messageSnackbarHelper.showMessage(this@KarnivoraActivity, text)
-                        break
+//                        val text = String.format("Detected Image %d", augmentedImage.index)
+//                        messageSnackbarHelper.showMessage(this@KarnivoraActivity, text)
+                        return
                     }
                     TrackingState.TRACKING -> {
                         if (augmentedImage.name.equals("daging.jpg") && shouldAddModel) {
@@ -249,9 +273,12 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
 
         }
         arView.scene.addChild(anchorNode)
-        arView.scene.setOnTouchListener { hitTestResult, motionEvent ->
-            Toast.makeText(this, "Model tidak dapat dimuat", Toast.LENGTH_SHORT).show()
-            startActivity(Intent(this, DetailActivity::class.java).putExtra("nama", title))
+        arView.scene.setOnTouchListener { _, _ ->
+            val bundle = Bundle().apply {
+                putString(CATEGORY, KARNIVORA)
+                putString(NAME, title)
+            }
+            startActivity(Intent(this, DetailActivity::class.java).putExtras(bundle))
             finish()
             true
         }

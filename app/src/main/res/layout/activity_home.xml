@@ -202,7 +202,7 @@
                                 android:background="@color/primary_Color"
                                 android:gravity="center"
                                 android:padding="8dp"
-                                android:text="About"
+                                android:text="Tentang"
                                 android:textColor="@color/white" />
 
                         </LinearLayout>

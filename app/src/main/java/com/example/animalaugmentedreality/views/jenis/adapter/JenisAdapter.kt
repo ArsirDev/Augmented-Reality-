@@ -7,6 +7,7 @@ import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.example.animalaugmentedreality.R
 import com.example.animalaugmentedreality.databinding.ImageJenisItemBinding
+import com.example.animalaugmentedreality.utils.setOnClickListenerWithDebounce
 
 class JenisAdapter: PagerAdapter() {
 
@@ -45,7 +46,7 @@ class JenisAdapter: PagerAdapter() {
                 ivRoundImage.setImageResource(imageList[position])
                 tvTitle.text = titleList[position]
                 tvDescription.text = descripList[position]
-                cvItem.setOnClickListener {
+                cvItem.setOnClickListenerWithDebounce {
                     onItemClickListener?.let {
                         it(position)
                     }

@@ -249,7 +249,7 @@ class InsektivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
 
         }
         arView.scene.addChild(anchorNode)
-        arView.scene.setOnTouchListener { hitTestResult, motionEvent ->
+        arView.scene.setOnTouchListener { _, _ ->
             val bundle = Bundle().apply {
                 putString(CATEGORY, INSEKTIVORA)
                 putString(NAME, title)

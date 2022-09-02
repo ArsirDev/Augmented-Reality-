@@ -5,6 +5,7 @@ import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import android.os.SystemClock
 import android.util.Log
 import android.view.View
 import android.view.animation.Animation
@@ -16,7 +17,7 @@ import androidx.fragment.app.commit
 import com.example.animalaugmentedreality.utils.Content.MIN_OPENGL_VERSION
 import com.google.ar.sceneform.ux.ArFragment
 
-fun ScaleAnimationCustome(
+fun scaleAnimationCustom(
     fromX: Float,
     toX: Float,
     fromY: Float,
@@ -38,21 +39,6 @@ fun ScaleAnimationCustome(
     )
 }
 
-fun View.startAnimation(animation: Animation, onEnd: () -> Unit) {
-    animation.setAnimationListener(object : Animation.AnimationListener {
-        override fun onAnimationStart(p0: Animation?) = Unit
-
-        override fun onAnimationEnd(p0: Animation?) {
-            onEnd()
-        }
-
-        override fun onAnimationRepeat(p0: Animation?) = Unit
-
-
-    })
-    this.startAnimation(animation)
-}
-
 fun View.showView() {
     this.visibility = View.VISIBLE
 }
@@ -65,32 +51,17 @@ fun P_E_M(tag: String, msg: String){
     Log.e(tag, msg)
 }
 
-fun Activity.simpleName() = this::class.java.simpleName
-fun Fragment.simpleName() = this::class.java.simpleName
+fun View.setOnClickListenerWithDebounce(debounceTime: Long = 600L, action: () -> Unit) {
+    this.setOnClickListener(object : View.OnClickListener {
+        private var lastClickTime: Long = 0
 
+        override fun onClick(v: View) {
+            if (SystemClock.elapsedRealtime() - lastClickTime < debounceTime) return
+            else action()
 
-fun AppCompatActivity.transaction(containerViewId: Int, fragment: Fragment?, bundle: Bundle? = null, addToBackstack: Boolean = false) {
-    supportFragmentManager.commit {
-        fragment?.let {
-            if (!fragment.isAdded) {
-                fragment.arguments = bundle
-                add(containerViewId, fragment, fragment.tag)
-                if (addToBackstack) addToBackStack(fragment.tag)
-            }
+            lastClickTime = SystemClock.elapsedRealtime()
         }
-    }
-}
-
-fun Fragment.transaction(containerViewId: Int, fragment: Fragment?, bundle: Bundle? = null, addToBackstack: Boolean = false) {
-    childFragmentManager.commit {
-        fragment?.let {
-            if (!fragment.isAdded) {
-                fragment.arguments = bundle
-                add(containerViewId, fragment, fragment.tag)
-                if (addToBackstack) addToBackStack(fragment.tag)
-            }
-        }
-    }
+    })
 }
 
 fun checkIsSupportDeviceOrFinish(activity: Activity): Boolean {

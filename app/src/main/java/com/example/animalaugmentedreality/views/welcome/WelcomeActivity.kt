@@ -65,7 +65,7 @@ class WelcomeActivity : AppCompatActivity() {
                 if (position == 0) {
                     TransitionManager.beginDelayedTransition(binding.container)
                     if (binding.btnNext.visibility == View.VISIBLE){
-                        binding.btnNext.showView()
+                        binding.btnNext.removeView()
                     }
                     binding.tvDescription.text = getString(R.string.welcome_description_one)
                 } else if (position == 1) {

@@ -10,13 +10,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.example.animalaugmentedreality.R
 import com.example.animalaugmentedreality.databinding.ActivityHerbivoraBinding
+import com.example.animalaugmentedreality.utils.Content.CATEGORY
 import com.example.animalaugmentedreality.utils.Content.GAJAH
+import com.example.animalaugmentedreality.utils.Content.HERBIVORA
 import com.example.animalaugmentedreality.utils.Content.KAMBING
 import com.example.animalaugmentedreality.utils.Content.KELINCI
 import com.example.animalaugmentedreality.utils.Content.KUDA
-import com.example.animalaugmentedreality.utils.P_E_M
+import com.example.animalaugmentedreality.utils.Content.NAME
 import com.example.animalaugmentedreality.utils.SnackbarHelper
-import com.example.animalaugmentedreality.utils.simpleName
 import com.example.animalaugmentedreality.views.detail.DetailActivity
 import com.example.animalaugmentedreality.views.jenis.JenisActivity
 import com.google.ar.core.Anchor
@@ -64,6 +65,8 @@ class HerbivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
     private var herbivoraList : HashMap<String, Int> = HashMap()
 
     private var title: String = String()
+
+    private var arConfig: Config? = null
 
     private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
         if (isGranted) {
@@ -117,6 +120,7 @@ class HerbivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
             Toast.makeText(this, "Error built-in database", Toast.LENGTH_SHORT).show()
         }
         config.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+        config.focusMode = Config.FocusMode.AUTO
         session!!.configure(config)
     }
 
@@ -154,6 +158,17 @@ class HerbivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
         }
     }
 
+    private fun Session.setupAutoFocus() {
+        arConfig = Config(this)
+
+        if (arConfig?.focusMode == Config.FocusMode.FIXED)
+            arConfig?.focusMode = Config.FocusMode.AUTO
+
+        arConfig?.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+
+        configure(arConfig)
+    }
+
     private fun iniHerbivoraList() {
         herbivoraList[GAJAH] = R.raw.gajah
         herbivoraList[KAMBING] = R.raw.kambing
@@ -167,7 +182,10 @@ class HerbivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
         super.onResume()
         requestPermissionLauncher.launch(CAMERA)
         binding.arView.resume()
-
+        if (session == null) {
+            session = Session(this)
+            session?.setupAutoFocus()
+        }
     }
 
     override fun onRestart() {
@@ -250,10 +268,15 @@ class HerbivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
         arView.scene.apply {
 
         }
+
         arView.scene.addChild(anchorNode)
         arView.scene.setOnTouchListener { _, _ ->
             Toast.makeText(this, "Model tidak dapat dimuat", Toast.LENGTH_SHORT).show()
-            startActivity(Intent(this, DetailActivity::class.java).putExtra("nama", title))
+            val bundle = Bundle().apply {
+                putString(CATEGORY, HERBIVORA)
+                putString(NAME, title)
+            }
+            startActivity(Intent(this, DetailActivity::class.java).putExtras(bundle))
             finish()
             true
         }
