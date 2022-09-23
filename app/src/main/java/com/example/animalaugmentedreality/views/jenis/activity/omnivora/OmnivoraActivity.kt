@@ -4,9 +4,11 @@ import android.Manifest
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.WindowCompat
 import com.example.animalaugmentedreality.R
 import com.example.animalaugmentedreality.databinding.ActivityOmnivoraBinding
 import com.example.animalaugmentedreality.utils.Content.AYAM
@@ -16,7 +18,9 @@ import com.example.animalaugmentedreality.utils.Content.KUCING
 import com.example.animalaugmentedreality.utils.Content.NAME
 import com.example.animalaugmentedreality.utils.Content.OMNIVORA
 import com.example.animalaugmentedreality.utils.Content.PAUS
+import com.example.animalaugmentedreality.utils.FullScreenHelper
 import com.example.animalaugmentedreality.utils.SnackbarHelper
+import com.example.animalaugmentedreality.utils.setOnClickListenerWithDebounce
 import com.example.animalaugmentedreality.views.detail.DetailActivity
 import com.example.animalaugmentedreality.views.jenis.JenisActivity
 import com.google.ar.core.Anchor
@@ -60,26 +64,28 @@ class OmnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
 
     private val messageSnackbarHelper: SnackbarHelper = SnackbarHelper()
 
-    private var omnivoraList : HashMap<String, Int> = HashMap()
+    private var omnivoraList: HashMap<String, Int> = HashMap()
 
     private var title: String = String()
 
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
-        if (isGranted) {
-            setUpSession()
+    private var arConfig: Config? = null
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                setUpSession()
+            }
         }
-    }
 
     private fun setUpSession() {
         if (session == null) {
             try {
-                when(ArCoreApk.getInstance().requestInstall(this, !installRequest)) {
+                when (ArCoreApk.getInstance().requestInstall(this, !installRequest)) {
                     ArCoreApk.InstallStatus.INSTALL_REQUESTED -> {
                         installRequest = true
                         return
                     }
                     ArCoreApk.InstallStatus.INSTALLED -> {
-
                     }
                 }
                 session = Session(this)
@@ -94,7 +100,6 @@ class OmnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
             }
             shouldConfigureSession = true
         }
-
         if (shouldConfigureSession) {
             configureSession()
             shouldConfigureSession = false
@@ -112,12 +117,22 @@ class OmnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
 
     private fun configureSession() {
         val config = Config(session)
-        if (!buildDatabase(config)){
+        if (!buildDatabase(config)) {
             Toast.makeText(this, "Error built-in database", Toast.LENGTH_SHORT).show()
-        } else {
-            config.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
-            session!!.configure(config)
+            return
         }
+        config.apply {
+            lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
+            focusMode = Config.FocusMode.AUTO
+            updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+            depthMode =
+                if (session!!.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
+                    Config.DepthMode.AUTOMATIC
+                } else {
+                    Config.DepthMode.DISABLED
+                }
+        }
+        session!!.configure(config)
     }
 
     private fun buildDatabase(config: Config): Boolean {
@@ -131,6 +146,11 @@ class OmnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
             e.printStackTrace()
             false
         }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        FullScreenHelper.setFullScreenOnWindowFocusChanged(this, hasFocus)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -148,10 +168,20 @@ class OmnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
     }
 
     private fun initView() {
-        binding.btnDelete.setOnClickListener {
-            startActivity(Intent(this, JenisActivity::class.java))
-            finish()
-        }
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+    }
+
+    private fun Session.setupAutoFocus() {
+        arConfig = Config(this)
+        if (arConfig?.focusMode == Config.FocusMode.FIXED)
+            arConfig?.focusMode = Config.FocusMode.AUTO
+        arConfig?.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+        configure(arConfig)
+        binding.arView.setupSession(this)
+        Log.e(
+            this@OmnivoraActivity.toString(),
+            "The camera is current in focus mode : ${config.focusMode.name}"
+        )
     }
 
     private fun initList() {
@@ -165,15 +195,40 @@ class OmnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
 
     override fun onResume() {
         super.onResume()
-        requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-        binding.arView.resume()
+        try {
+            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
+            binding.arView.resume()
+            session?.let {
+                session = Session(this)
+                it.setupAutoFocus()
+            }
+        } catch (e: CameraNotAvailableException) {
+            e.printStackTrace()
+        }
     }
 
     override fun onRestart() {
         super.onRestart()
+        session?.let {
+            it.pause()
+            binding.arView.pause()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
         if (session != null) {
             session!!.pause()
             binding.arView.pause()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (session != null) {
+            session!!.close()
+            session = null
+            binding.arView.destroy()
         }
     }
 
@@ -187,7 +242,7 @@ class OmnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
                     TrackingState.PAUSED -> {
                         val text = String.format("Detected Image %d", augmentedImage.index)
                         messageSnackbarHelper.showMessage(this@OmnivoraActivity, text)
-                        break
+                        return@with
                     }
                     TrackingState.TRACKING -> {
                         if (augmentedImage.name.equals("daging.jpg") && shouldAddModel) {
@@ -197,20 +252,22 @@ class OmnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
                                 omnivoraList[title] ?: 0
                             )
                             shouldAddModel = false
-                            break
-                        } else if (augmentedImage.name.equals("tanaman.jpg") && shouldAddModel) {
+                            return@onUpdate
+                        }
+
+                        if (augmentedImage.name.equals("tanaman.jpg") && shouldAddModel) {
                             placeObject(
                                 arView,
                                 augmentedImage.createAnchor(augmentedImage.centerPose),
                                 omnivoraList[title] ?: 0
                             )
                             shouldAddModel = false
-                            break
+                            return@onUpdate
                         }
                     }
                     TrackingState.STOPPED -> {
                         updateAugmentedImage.remove()
-                        break
+                        return@with
                     }
                     else -> {
                         break
@@ -246,18 +303,24 @@ class OmnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
     ) {
         val anchorNode = AnchorNode(anchor)
         val pose = Pose.makeTranslation(0f, 0f, 0f)
-        Node().apply {
+        val node = Node().apply {
             renderable = modelRenderable
             setParent(anchorNode)
         }
+
+        binding.btnDelete.setOnClickListenerWithDebounce {
+            shouldAddModel = true
+            title = omnivoraList.keys.random()
+            anchorNode.removeChild(node)
+            anchor!!.detach()
+            return@setOnClickListenerWithDebounce
+        }
+
         anchorNode.addChild(Node().apply {
             renderable = viewRenderable
             localPosition = Vector3(pose.tx(), this.localPosition.y + 0.5f, pose.tz())
             setParent(anchorNode)
         })
-        arView.scene.apply {
-
-        }
         arView.scene.addChild(anchorNode)
         arView.scene.setOnTouchListener { _, _ ->
             val bundle = Bundle().apply {
@@ -292,22 +355,5 @@ class OmnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
         super.onBackPressed()
         startActivity(Intent(this, JenisActivity::class.java))
         finish()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (session != null) {
-            session!!.close()
-            session = null
-            binding.arView.destroy()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (session != null) {
-            session!!.pause()
-            binding.arView.pause()
-        }
     }
 }

@@ -3,13 +3,14 @@ package com.example.animalaugmentedreality.views.jenis.activity.karnivora
 import android.Manifest.permission.CAMERA
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import com.example.animalaugmentedreality.R
 import com.example.animalaugmentedreality.databinding.ActivityKarnivoraBinding
-import com.example.animalaugmentedreality.utils.ARCoreSessionLifecycleHelper
 import com.example.animalaugmentedreality.utils.Content.CATEGORY
 import com.example.animalaugmentedreality.utils.Content.KARNIVORA
 import com.example.animalaugmentedreality.utils.Content.KOMODO
@@ -17,7 +18,9 @@ import com.example.animalaugmentedreality.utils.Content.NAME
 import com.example.animalaugmentedreality.utils.Content.SERIGALA
 import com.example.animalaugmentedreality.utils.Content.SINGA
 import com.example.animalaugmentedreality.utils.Content.ULAR
+import com.example.animalaugmentedreality.utils.FullScreenHelper
 import com.example.animalaugmentedreality.utils.SnackbarHelper
+import com.example.animalaugmentedreality.utils.setOnClickListenerWithDebounce
 import com.example.animalaugmentedreality.views.detail.DetailActivity
 import com.example.animalaugmentedreality.views.jenis.JenisActivity
 import com.google.ar.core.Anchor
@@ -54,8 +57,6 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
 
     private var session: Session? = null
 
-    lateinit var arCoreSessionHelper: ARCoreSessionLifecycleHelper
-
     private var shouldAddModel = true
 
     private var viewRenderable: ViewRenderable? = null
@@ -64,9 +65,11 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
 
     private val messageSnackbarHelper: SnackbarHelper = SnackbarHelper()
 
-    private var karnivoraList : HashMap<String, Int> = HashMap()
+    private var karnivoraList: HashMap<String, Int> = HashMap()
 
     private var title: String = String()
+
+    private var arConfig: Config? = null
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -115,13 +118,12 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
     }
 
     private fun configureSession() {
-
         val config = Config(session)
         if (!buildDatabase(config)) {
             Toast.makeText(this, "Error built-in database", Toast.LENGTH_SHORT).show()
         }
         config.apply {
-            lightEstimationMode =  Config.LightEstimationMode.ENVIRONMENTAL_HDR
+            lightEstimationMode = Config.LightEstimationMode.ENVIRONMENTAL_HDR
             focusMode = Config.FocusMode.AUTO
             updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
 
@@ -132,10 +134,6 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
                     Config.DepthMode.DISABLED
                 }
         }
-//        config.lightEstimationMode =  Config.LightEstimationMode.ENVIRONMENTAL_HDR
-//        config.focusMode = Config.FocusMode.AUTO
-//        config.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
-
         session!!.configure(config)
     }
 
@@ -152,12 +150,15 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
         }
     }
 
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        FullScreenHelper.setFullScreenOnWindowFocusChanged(this, hasFocus)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityKarnivoraBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        arCoreSessionHelper = ARCoreSessionLifecycleHelper(this)
 
         requestPermissionLauncher.launch(CAMERA)
 
@@ -169,10 +170,20 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
     }
 
     private fun initView() {
-        binding.btnDelete.setOnClickListener {
-            startActivity(Intent(this, JenisActivity::class.java))
-            finish()
-        }
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+    }
+
+    private fun Session.setupAutoFocus() {
+        arConfig = Config(this)
+        if (arConfig?.focusMode == Config.FocusMode.FIXED)
+            arConfig?.focusMode = Config.FocusMode.AUTO
+        arConfig?.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+        configure(arConfig)
+        binding.arView.setupSession(this)
+        Log.e(
+            this@KarnivoraActivity.toString(),
+            "The camera is current in focus mode : ${config.focusMode.name}"
+        )
     }
 
     private fun initList() {
@@ -186,9 +197,16 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
 
     override fun onResume() {
         super.onResume()
-        requestPermissionLauncher.launch(CAMERA)
-        binding.arView.resume()
-
+        try {
+            requestPermissionLauncher.launch(CAMERA)
+            binding.arView.resume()
+            session?.let {
+                session = Session(this)
+                session?.setupAutoFocus()
+            }
+        } catch (e: CameraNotAvailableException) {
+            e.printStackTrace()
+        }
     }
 
     override fun onRestart() {
@@ -196,6 +214,23 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
         if (session != null) {
             session!!.pause()
             binding.arView.pause()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (session != null) {
+            session!!.pause()
+            binding.arView.pause()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (session != null) {
+            session!!.close()
+            session = null
+            binding.arView.destroy()
         }
     }
 
@@ -207,9 +242,9 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
             for (augmentedImage in updateAugmentedImage) {
                 when (augmentedImage.trackingState) {
                     TrackingState.PAUSED -> {
-//                        val text = String.format("Detected Image %d", augmentedImage.index)
-//                        messageSnackbarHelper.showMessage(this@KarnivoraActivity, text)
-                        return
+                        val text = String.format("Detected Image %d", augmentedImage.index)
+                        messageSnackbarHelper.showMessage(this@KarnivoraActivity, text)
+                        return@onUpdate
                     }
                     TrackingState.TRACKING -> {
                         if (augmentedImage.name.equals("daging.jpg") && shouldAddModel) {
@@ -218,13 +253,13 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
                                 augmentedImage.createAnchor(augmentedImage.centerPose),
                                 karnivoraList[title] ?: 0
                             )
-                            shouldAddModel = false
-                            break
                         }
+                        shouldAddModel = false
+                        return@onUpdate
                     }
                     TrackingState.STOPPED -> {
                         updateAugmentedImage.remove()
-                        break
+                        return@with
                     }
                     else -> {
                         break
@@ -260,18 +295,24 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
     ) {
         val anchorNode = AnchorNode(anchor)
         val pose = Pose.makeTranslation(0f, 0f, 0f)
-        Node().apply {
+        val node = Node().apply {
             renderable = modelRenderable
             setParent(anchorNode)
         }
+
+        binding.btnDelete.setOnClickListenerWithDebounce {
+            shouldAddModel = true
+            title = karnivoraList.keys.random()
+            anchorNode.removeChild(node)
+            anchor!!.detach()
+            return@setOnClickListenerWithDebounce
+        }
+
         anchorNode.addChild(Node().apply {
             renderable = viewRenderable
             localPosition = Vector3(pose.tx(), this.localPosition.y + 0.5f, pose.tz())
             setParent(anchorNode)
         })
-        arView.scene.apply {
-
-        }
         arView.scene.addChild(anchorNode)
         arView.scene.setOnTouchListener { _, _ ->
             val bundle = Bundle().apply {
@@ -282,6 +323,8 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
             finish()
             true
         }
+
+
     }
 
     private fun setName(name: String) {
@@ -306,22 +349,5 @@ class KarnivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
         super.onBackPressed()
         startActivity(Intent(this, JenisActivity::class.java))
         finish()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (session != null) {
-            session!!.close()
-            session = null
-            binding.arView.destroy()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (session != null) {
-            session!!.pause()
-            binding.arView.pause()
-        }
     }
 }

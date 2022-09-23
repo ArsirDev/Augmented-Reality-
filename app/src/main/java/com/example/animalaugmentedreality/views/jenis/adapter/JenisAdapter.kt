@@ -13,9 +13,9 @@ class JenisAdapter: PagerAdapter() {
 
     private val imageList = listOf(
         R.drawable.home_bear,
-        R.drawable.home_bird,
-        R.drawable.home_dog,
         R.drawable.home_elephant,
+        R.drawable.home_kucing,
+        R.drawable.home_laba,
     )
 
     private val titleList = listOf(

@@ -15,6 +15,8 @@ class HomeAdapter(private val layoutInflater: LayoutInflater): PagerAdapter() {
         R.drawable.home_bird,
         R.drawable.home_dog,
         R.drawable.home_elephant,
+        R.drawable.home_laba,
+        R.drawable.home_kucing,
         R.drawable.home_tiger,
         R.drawable.home_wolf
     )

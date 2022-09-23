@@ -53,12 +53,10 @@ class transformer: ViewPager.PageTransformer {
         page.apply {
             when {
                 position < -1 -> {
-                    P_E_M("zoom", "nol: $position")
                     alpha = 0f
                 }
 
                 position <= 1 -> {
-                    P_E_M("zoom", "satu: $position")
                     val scaleFactor = max(MIN_SCALE, 1 - abs(position))
                     scaleX = scaleFactor
                     scaleY = scaleFactor

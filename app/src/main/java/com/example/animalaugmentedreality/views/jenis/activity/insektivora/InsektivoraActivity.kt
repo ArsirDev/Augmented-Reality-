@@ -4,9 +4,11 @@ import android.Manifest.permission.CAMERA
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.WindowCompat
 import com.example.animalaugmentedreality.R
 import com.example.animalaugmentedreality.databinding.ActivityInsektivoraBinding
 import com.example.animalaugmentedreality.utils.Content.BUNGLON
@@ -16,7 +18,9 @@ import com.example.animalaugmentedreality.utils.Content.KALELAWAR
 import com.example.animalaugmentedreality.utils.Content.KATAK
 import com.example.animalaugmentedreality.utils.Content.LABALABA
 import com.example.animalaugmentedreality.utils.Content.NAME
+import com.example.animalaugmentedreality.utils.FullScreenHelper
 import com.example.animalaugmentedreality.utils.SnackbarHelper
+import com.example.animalaugmentedreality.utils.setOnClickListenerWithDebounce
 import com.example.animalaugmentedreality.views.detail.DetailActivity
 import com.example.animalaugmentedreality.views.jenis.JenisActivity
 import com.google.ar.core.Anchor
@@ -63,6 +67,8 @@ class InsektivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
     private var insektivoraList: HashMap<String, Int> = HashMap()
 
     private var title: String = String()
+
+    private var arConfig: Config? = null
 
     private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
          if (isGranted) {
@@ -113,8 +119,20 @@ class InsektivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
         val config = Config(session)
         if (!buildDatabase(config)) {
             Toast.makeText(this, "Error built-in database", Toast.LENGTH_SHORT).show()
+            return
         }
-        config.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+
+        config.apply {
+            lightEstimationMode =  Config.LightEstimationMode.ENVIRONMENTAL_HDR
+            focusMode = Config.FocusMode.AUTO
+            updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+            depthMode =
+                if (session!!.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
+                    Config.DepthMode.AUTOMATIC
+                } else {
+                    Config.DepthMode.DISABLED
+                }
+        }
         session!!.configure(config)
     }
 
@@ -129,6 +147,11 @@ class InsektivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
             e.printStackTrace()
             false
         }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        FullScreenHelper.setFullScreenOnWindowFocusChanged(this, hasFocus)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -146,10 +169,17 @@ class InsektivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
     }
 
     private fun iniView() {
-        binding.btnDelete.setOnClickListener {
-            startActivity(Intent(this, JenisActivity::class.java))
-            finish()
-        }
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+    }
+
+    private fun Session.setupAutoFocus() {
+        arConfig = Config(this)
+        if (arConfig?.focusMode == Config.FocusMode.FIXED)
+            arConfig?.focusMode = Config.FocusMode.AUTO
+        arConfig?.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+        configure(arConfig)
+        binding.arView.setupSession(this)
+        Log.e(this@InsektivoraActivity.toString(),"The camera is current in focus mode : ${config.focusMode.name}")
     }
 
     private fun initList() {
@@ -163,16 +193,41 @@ class InsektivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
 
     override fun onResume() {
         super.onResume()
-        requestPermissionLauncher.launch(CAMERA)
-        binding.arView.resume()
+        try {
+            requestPermissionLauncher.launch(CAMERA)
+            binding.arView.resume()
+            session?.let {
+                session = Session(this)
+                it.setupAutoFocus()
+            }
+        } catch (e: CameraNotAvailableException) {
+            e.printStackTrace()
+        }
 
     }
 
     override fun onRestart() {
         super.onRestart()
+        session?.let {
+            it.pause()
+            binding.arView.pause()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
         if (session != null) {
             session!!.pause()
             binding.arView.pause()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (session != null) {
+            session!!.close()
+            session = null
+            binding.arView.destroy()
         }
     }
 
@@ -186,7 +241,7 @@ class InsektivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
                     TrackingState.PAUSED -> {
                         val text = String.format("Detected Image %d", augmentedImage.index)
                         messageSnackbarHelper.showMessage(this@InsektivoraActivity, text)
-                        break
+                        return@with
                     }
                     TrackingState.TRACKING -> {
                         if (augmentedImage.name.equals("serangga.jpg") && shouldAddModel) {
@@ -196,11 +251,12 @@ class InsektivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
                                 insektivoraList[title] ?: 0
                             )
                             shouldAddModel = false
+                            return@onUpdate
                         }
                     }
                     TrackingState.STOPPED -> {
                         updateAugmentedImage.remove()
-                        break
+                        return@with
                     }
                     else -> {
                         break
@@ -236,18 +292,25 @@ class InsektivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
     ) {
         val anchorNode = AnchorNode(anchor)
         val pose = Pose.makeTranslation(0f, 0f, 0f)
-        Node().apply {
+        val node = Node().apply {
             renderable = modelRenderable
             setParent(anchorNode)
         }
+
+        binding.btnDelete.setOnClickListenerWithDebounce {
+            shouldAddModel = true
+            title = insektivoraList.keys.random()
+            anchorNode.removeChild(node)
+            anchor!!.detach()
+            return@setOnClickListenerWithDebounce
+        }
+
         anchorNode.addChild(Node().apply {
             renderable = viewRenderable
             localPosition = Vector3(pose.tx(), this.localPosition.y + 0.5f, pose.tz())
             setParent(anchorNode)
         })
-        arView.scene.apply {
 
-        }
         arView.scene.addChild(anchorNode)
         arView.scene.setOnTouchListener { _, _ ->
             val bundle = Bundle().apply {
@@ -282,22 +345,5 @@ class InsektivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
         super.onBackPressed()
         startActivity(Intent(this, JenisActivity::class.java))
         finish()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (session != null) {
-            session!!.close()
-            session = null
-            binding.arView.destroy()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (session != null) {
-            session!!.pause()
-            binding.arView.pause()
-        }
     }
 }

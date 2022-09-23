@@ -4,10 +4,12 @@ import android.Manifest.permission.CAMERA
 import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
 import com.example.animalaugmentedreality.R
 import com.example.animalaugmentedreality.databinding.ActivityHerbivoraBinding
 import com.example.animalaugmentedreality.utils.Content.CATEGORY
@@ -17,7 +19,9 @@ import com.example.animalaugmentedreality.utils.Content.KAMBING
 import com.example.animalaugmentedreality.utils.Content.KELINCI
 import com.example.animalaugmentedreality.utils.Content.KUDA
 import com.example.animalaugmentedreality.utils.Content.NAME
+import com.example.animalaugmentedreality.utils.FullScreenHelper
 import com.example.animalaugmentedreality.utils.SnackbarHelper
+import com.example.animalaugmentedreality.utils.setOnClickListenerWithDebounce
 import com.example.animalaugmentedreality.views.detail.DetailActivity
 import com.example.animalaugmentedreality.views.jenis.JenisActivity
 import com.google.ar.core.Anchor
@@ -35,6 +39,7 @@ import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.ArSceneView
+import com.google.ar.sceneform.Camera
 import com.google.ar.sceneform.FrameTime
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.Scene
@@ -83,7 +88,6 @@ class HerbivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
                         return
                     }
                     ArCoreApk.InstallStatus.INSTALLED -> {
-
                     }
                 }
                 session = Session(this)
@@ -98,7 +102,6 @@ class HerbivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
             }
             shouldConfigureSession = true
         }
-
         if (shouldConfigureSession) {
             configureSession()
             shouldConfigureSession = false
@@ -118,9 +121,19 @@ class HerbivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
         val config = Config(session)
         if (!buildDatabase(config)) {
             Toast.makeText(this, "Error built-in database", Toast.LENGTH_SHORT).show()
+            return
         }
-        config.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
-        config.focusMode = Config.FocusMode.AUTO
+        config.apply {
+            lightEstimationMode =  Config.LightEstimationMode.ENVIRONMENTAL_HDR
+            focusMode = Config.FocusMode.AUTO
+            updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
+            depthMode =
+                if (session!!.isDepthModeSupported(Config.DepthMode.AUTOMATIC)) {
+                    Config.DepthMode.AUTOMATIC
+                } else {
+                    Config.DepthMode.DISABLED
+                }
+        }
         session!!.configure(config)
     }
 
@@ -135,6 +148,11 @@ class HerbivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
             e.printStackTrace()
             false
         }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        FullScreenHelper.setFullScreenOnWindowFocusChanged(this, hasFocus)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -152,21 +170,17 @@ class HerbivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
     }
 
     private fun initView() {
-        binding.btnDelete.setOnClickListener {
-            startActivity(Intent(this, JenisActivity::class.java))
-            finish()
-        }
+        WindowCompat.setDecorFitsSystemWindows(window, true)
     }
 
     private fun Session.setupAutoFocus() {
         arConfig = Config(this)
-
         if (arConfig?.focusMode == Config.FocusMode.FIXED)
             arConfig?.focusMode = Config.FocusMode.AUTO
-
         arConfig?.updateMode = Config.UpdateMode.LATEST_CAMERA_IMAGE
-
         configure(arConfig)
+        binding.arView.setupSession(this)
+        Log.e(this@HerbivoraActivity.toString(),"The camera is current in focus mode : ${config.focusMode.name}")
     }
 
     private fun iniHerbivoraList() {
@@ -180,19 +194,40 @@ class HerbivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
 
     override fun onResume() {
         super.onResume()
-        requestPermissionLauncher.launch(CAMERA)
-        binding.arView.resume()
-        if (session == null) {
-            session = Session(this)
-            session?.setupAutoFocus()
+        try {
+            requestPermissionLauncher.launch(CAMERA)
+            binding.arView.resume()
+            session?.let {
+                session = Session(this)
+                it.setupAutoFocus()
+            }
+        } catch (e: CameraNotAvailableException) {
+            e.printStackTrace()
         }
     }
 
     override fun onRestart() {
         super.onRestart()
+        session?.let {
+            it.pause()
+            binding.arView.pause()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
         if (session != null) {
             session!!.pause()
             binding.arView.pause()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (session != null) {
+            session!!.close()
+            session = null
+            binding.arView.destroy()
         }
     }
 
@@ -206,7 +241,7 @@ class HerbivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
                     TrackingState.PAUSED -> {
                         val text = String.format("Detected Image %d", augmentedImage.index)
                         messageSnackbarHelper.showMessage(this@HerbivoraActivity, text)
-                        break
+                        return@with
                     }
                     TrackingState.TRACKING -> {
                         if (augmentedImage.name.equals("tanaman.jpg") && shouldAddModel) {
@@ -216,11 +251,12 @@ class HerbivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
                                 herbivoraList[title] ?: 0
                             )
                             shouldAddModel = false
+                            return@onUpdate
                         }
                     }
                     TrackingState.STOPPED -> {
                         updateAugmentedImage.remove()
-                        break
+                        return@with
                     }
                     else -> {
                         break
@@ -256,19 +292,24 @@ class HerbivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
     ) {
         val anchorNode = AnchorNode(anchor)
         val pose = Pose.makeTranslation(0f, 0f, 0f)
-        Node().apply {
+        val node = Node().apply {
             renderable = modelRenderable
             setParent(anchorNode)
         }
+
+        binding.btnDelete.setOnClickListenerWithDebounce {
+            shouldAddModel = true
+            title = herbivoraList.keys.random()
+            anchorNode.removeChild(node)
+            anchor!!.detach()
+            return@setOnClickListenerWithDebounce
+        }
+
         anchorNode.addChild(Node().apply {
             renderable = viewRenderable
             localPosition = Vector3(pose.tx(), this.localPosition.y + 0.5f, pose.tz())
             setParent(anchorNode)
         })
-        arView.scene.apply {
-
-        }
-
         arView.scene.addChild(anchorNode)
         arView.scene.setOnTouchListener { _, _ ->
             Toast.makeText(this, "Model tidak dapat dimuat", Toast.LENGTH_SHORT).show()
@@ -304,22 +345,5 @@ class HerbivoraActivity : AppCompatActivity(), Scene.OnUpdateListener {
         super.onBackPressed()
         startActivity(Intent(this, JenisActivity::class.java))
         finish()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (session != null) {
-            session!!.close()
-            session = null
-            binding.arView.destroy()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (session != null) {
-            session!!.pause()
-            binding.arView.pause()
-        }
     }
 }

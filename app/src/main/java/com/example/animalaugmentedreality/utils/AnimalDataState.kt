@@ -118,7 +118,7 @@ class AnimalDataState {
     private val karnivoraHabitat= listOf(
         "Pulau atau Hutan",
         "Hutan",
-        "PAdang Rumput Atau Hutan",
+        "Padang Rumput Atau Hutan",
         "Hutan atau Rawa"
     )
 
